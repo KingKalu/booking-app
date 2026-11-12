@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
+import { authorizeApiRequest } from "@/lib/api-auth";
 import { getBooking } from "@/lib/bookings";
 
 export const runtime = "nodejs";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const authorizationError = authorizeApiRequest(request);
+  if (authorizationError) {
+    return authorizationError;
+  }
+
   try {
     const { id } = await context.params;
     const booking = await getBooking(id);

@@ -1,19 +1,15 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import {
+  refreshPatientSlots,
+  submitPatientBooking,
+} from "@/app/actions/booking";
 import type { AvailableSlot, Booking } from "@/lib/types";
 
 interface BookingFormProps {
   initialSlots: AvailableSlot[];
   initialError: string | null;
-}
-
-interface SlotListResponse {
-  slots: AvailableSlot[];
-}
-
-interface ErrorResponse {
-  error?: string;
 }
 
 interface Confirmation {
@@ -46,10 +42,9 @@ export default function BookingForm({
   async function refreshSlots() {
     setIsRefreshing(true);
     try {
-      const response = await fetch("/slots", { cache: "no-store" });
-      const result = (await response.json()) as SlotListResponse | ErrorResponse;
-      if (!response.ok || !("slots" in result)) {
-        throw new Error("Availability is temporarily unavailable.");
+      const result = await refreshPatientSlots();
+      if (!result.ok) {
+        throw new Error(result.error);
       }
       setSlots(result.slots);
     } finally {
@@ -73,26 +68,17 @@ export default function BookingForm({
     }
 
     try {
-      const response = await fetch("/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slot_id: selectedSlot,
-          name: formData.get("name"),
-          email: formData.get("email"),
-        }),
+      const result = await submitPatientBooking({
+        slot_id: selectedSlot,
+        name: formData.get("name"),
+        email: formData.get("email"),
       });
-      const result = (await response.json()) as Booking | ErrorResponse;
-      if (!response.ok || !("id" in result)) {
-        setError(
-          "error" in result && result.error
-            ? result.error
-            : "Your booking could not be completed. Please try again.",
-        );
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
 
-      setConfirmation({ booking: result, slot: bookedSlot });
+      setConfirmation({ booking: result.booking, slot: bookedSlot });
       setSelectedSlot("");
       form.reset();
       try {

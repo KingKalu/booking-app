@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { replaceSlots } from "@/lib/bookings";
+import { authorizeApiRequest } from "@/lib/api-auth";
+import { readLimitedJsonBody } from "@/lib/api-request";
 import type { Slot } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -18,25 +20,31 @@ function isSlot(value: unknown): value is Slot {
 }
 
 export async function POST(request: Request) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
+  const authorizationError = authorizeApiRequest(request);
+  if (authorizationError) {
+    return authorizationError;
+  }
+
+  const body = await readLimitedJsonBody(request);
+  if (!body.ok) {
+    return NextResponse.json(
+      { error: body.error },
+      { status: body.status },
+    );
   }
 
   if (
-    typeof body !== "object" ||
-    body === null ||
-    !("slots" in body) ||
-    !Array.isArray(body.slots) ||
-    !body.slots.every(isSlot)
+    typeof body.value !== "object" ||
+    body.value === null ||
+    !("slots" in body.value) ||
+    !Array.isArray(body.value.slots) ||
+    !body.value.slots.every(isSlot)
   ) {
     return NextResponse.json({ error: "invalid slots" }, { status: 400 });
   }
 
   try {
-    await replaceSlots(body.slots);
+    await replaceSlots(body.value.slots);
   } catch {
     return NextResponse.json(
       { error: "could not replace slots" },

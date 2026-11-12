@@ -46,13 +46,64 @@ export async function listSlots(
   }));
 }
 
-export async function createBooking(input: NewBooking): Promise<Booking | null> {
+export type BookingCreationResult =
+  | { ok: true; booking: Booking }
+  | { ok: false; status: 400 | 404; error: string };
+
+function normalizeBookingInput(value: unknown):
+  | { ok: true; input: NewBooking }
+  | { ok: false; error: string } {
+  if (typeof value !== "object" || value === null) {
+    return { ok: false, error: "invalid booking" };
+  }
+
+  const booking = value as Record<string, unknown>;
+  if (
+    typeof booking.slot_id !== "string" ||
+    typeof booking.name !== "string" ||
+    typeof booking.email !== "string"
+  ) {
+    return { ok: false, error: "slot_id, name, and email are required" };
+  }
+
+  const name = booking.name.trim();
+  const email = booking.email.trim();
+  if (
+    booking.slot_id.trim().length === 0 ||
+    name.length === 0 ||
+    email.length === 0
+  ) {
+    return { ok: false, error: "slot_id, name, and email are required" };
+  }
+
+  const emailPattern =
+    /^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]*[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]*[A-Z0-9])?)+$/i;
+  if (!emailPattern.test(email)) {
+    return { ok: false, error: "email must be valid" };
+  }
+
+  return {
+    ok: true,
+    input: { slot_id: booking.slot_id, name, email: email.toLowerCase() },
+  };
+}
+
+export async function createBooking(value: unknown): Promise<BookingCreationResult> {
+  const normalized = normalizeBookingInput(value);
+  if (!normalized.ok) {
+    return { ok: false, status: 400, error: normalized.error };
+  }
+
+  const input = normalized.input;
   const db = await getDatabase();
   const slot = await db.collection<SlotDocument>("slots").findOne({
     id: input.slot_id,
-  }, { projection: { _id: 1 } });
+  }, { projection: { start: 1, _id: 0 } });
   if (slot === null) {
-    return null;
+    return { ok: false, status: 404, error: "slot not found" };
+  }
+  if (slot.start.getTime() <= Date.now()) {
+    return { ok: false, status: 400, error: "slot has already started" };
   }
 
   const booking: BookingDocument = {
@@ -64,7 +115,7 @@ export async function createBooking(input: NewBooking): Promise<Booking | null> 
     created_at: new Date(),
   };
   await db.collection<BookingDocument>("bookings").insertOne(booking);
-  return serializeBooking(booking);
+  return { ok: true, booking: serializeBooking(booking) };
 }
 
 export async function getBooking(id: string): Promise<Booking | null> {
