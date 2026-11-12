@@ -15,13 +15,18 @@ product requirements are in [fsd.md](fsd.md). Follow that contract exactly.
 
 ## Project conventions
 
-- The only application manifest is `package.json`, configured for CommonJS.
-- No application framework, source layout, database, or styling approach is
-  established yet. Confirm these from project files before choosing conventions.
+- Next.js App Router with TypeScript; use server components for server-rendered
+  data and client components only for interactive behavior.
+- MongoDB is the persistent source of truth. Access it from server code only.
 - Do not commit credentials or expose server-side API keys in browser code.
+- The exact API contract is in `fsd.md`; preserve its routes, fields, response
+  shapes, and status codes.
 
 ## Commands
 
-No development, build, preview, lint, formatting, typecheck, or usable test
-commands are configured yet. The current `npm test` script is a placeholder
-that intentionally exits with an error; it is not a test runner or a test gate.
+- Dev server: `npm run dev` (http://localhost:3000)
+- Build: `npm run build`
+- Production server: `npm run start`
+- Typecheck: `npm run typecheck`
+
+No test runner, lint, or formatting command is configured.

@@ -2,3 +2,11 @@
 .claude
 blueprint/
 CLAUDE.md
+.next/
+node_modules/
+out/
+.vercel/
+*.tsbuildinfo
+.env*
+!.env.example
+npm-debug.log*

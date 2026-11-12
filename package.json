@@ -1,13 +1,25 @@
 {
   "name": "booking",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "seed": "node scripts/seed-demo-slots.mjs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "mongodb": "^6.17.0",
+    "next": "^16.4.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.8.3"
+  }
 }
