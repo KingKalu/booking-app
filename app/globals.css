@@ -23,7 +23,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -110,6 +111,59 @@ h2 {
   text-decoration: underline;
 }
 
+.slot-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--canvas);
+}
+
+.filter-field {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.filter-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #cbd8d3;
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+}
+
+.available-filter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.available-filter input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+}
+
+.clear-filters {
+  justify-self: end;
+}
+
+.results-count {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .slot-list {
   display: grid;
   gap: 10px;
@@ -192,6 +246,8 @@ h2 {
 }
 
 .form-panel input:focus-visible,
+.filter-field select:focus-visible,
+.available-filter input:focus-visible,
 .slot-option:focus-within,
 button:focus-visible {
   outline: 3px solid #8cc9b3;
@@ -274,5 +330,15 @@ button:focus-visible {
   .slots-panel,
   .form-panel {
     padding: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .slot-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .clear-filters {
+    justify-self: start;
   }
 }
