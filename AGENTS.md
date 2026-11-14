@@ -22,6 +22,13 @@ product requirements are in [fsd.md](fsd.md). Follow that contract exactly.
 - The exact API contract is in `fsd.md`; preserve its routes, fields, response
   shapes, and status codes.
 
+## Git workflow
+
+- Create a new branch for each feature, based on the latest `main`; do not
+  implement feature work directly on `main` or reuse another feature's branch.
+- Keep each feature's changes on its branch until the user approves merging.
+- Merge a feature branch into `main` only after explicit user approval.
+
 ## Commands
 
 - Dev server: `npm run dev` (http://localhost:3000)
