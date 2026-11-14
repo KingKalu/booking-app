@@ -81,7 +81,8 @@ h2 {
 }
 
 .slots-panel,
-.form-panel {
+.form-panel,
+.lookup-panel {
   padding: 28px;
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -175,13 +176,32 @@ h2 {
   gap: 10px;
 }
 
+.lookup-panel {
+  margin-top: 24px;
+}
+
+.lookup-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.lookup-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .form-panel label {
   margin-top: 8px;
   font-size: 0.9rem;
   font-weight: 700;
 }
 
-.form-panel input {
+.form-panel input,
+.lookup-form input {
   width: 100%;
   min-height: 46px;
   padding: 10px 12px;
@@ -192,6 +212,7 @@ h2 {
 }
 
 .form-panel input:focus-visible,
+.lookup-form input:focus-visible,
 .slot-option:focus-within,
 button:focus-visible {
   outline: 3px solid #8cc9b3;
@@ -251,6 +272,52 @@ button:focus-visible {
   color: var(--success);
 }
 
+.booking-status {
+  text-transform: capitalize;
+}
+
+.booking-status.cancelled {
+  color: var(--danger);
+}
+
+.booking-history {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.booking-history-item {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.booking-history-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.booking-history-item p {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.booking-history-item p:last-child {
+  margin-bottom: 0;
+}
+
+.load-more-button {
+  margin-top: 12px;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -272,7 +339,14 @@ button:focus-visible {
   }
 
   .slots-panel,
-  .form-panel {
+  .form-panel,
+  .lookup-panel {
     padding: 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .lookup-form {
+    grid-template-columns: 1fr;
   }
 }
