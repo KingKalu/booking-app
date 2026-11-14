@@ -26,6 +26,79 @@ type BookingRateLimitDocument = {
   last_attempt_allowed: boolean;
 };
 
+function isDateTimeString(value: string): boolean {
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-](\d{2}):(\d{2}))$/i.exec(
+      value,
+    );
+  if (!match) {
+    return false;
+  }
+
+  const [
+    ,
+    yearText,
+    monthText,
+    dayText,
+    hourText,
+    minuteText,
+    secondText,
+    ,
+    zoneHourText,
+    zoneMinuteText,
+  ] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const daysInMonth = [
+    31,
+    year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ][month - 1];
+
+  if (
+    daysInMonth === undefined ||
+    day < 1 ||
+    day > daysInMonth ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59 ||
+    (zoneHourText !== undefined &&
+      (Number(zoneHourText) > 23 || Number(zoneMinuteText) > 59))
+  ) {
+    return false;
+  }
+
+  return Number.isFinite(Date.parse(value));
+}
+
+export function isValidSlot(value: unknown): value is Slot {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const slot = value as Record<string, unknown>;
+  return (
+    typeof slot.id === "string" &&
+    typeof slot.provider === "string" &&
+    typeof slot.start === "string" &&
+    isDateTimeString(slot.start) &&
+    typeof slot.end === "string" &&
+    isDateTimeString(slot.end)
+  );
+}
+
 let bookingIndexesPromise: Promise<void> | undefined;
 let rateLimitIndexPromise: Promise<string> | undefined;
 
@@ -465,6 +538,10 @@ export async function listBookings(
 }
 
 export async function replaceSlots(slots: Slot[]): Promise<void> {
+  if (!slots.every(isValidSlot)) {
+    throw new Error("slots contain invalid date-time values");
+  }
+
   const client = await getMongoClient();
   const db = client.db(process.env.MONGODB_DB || "clinic_booking");
   const session = client.startSession();
